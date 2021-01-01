@@ -2,10 +2,10 @@ import 'dart:math' as math;
 
 void main() {
   final board = <List<int>>[
-    [1, 2, 3, 4, 5, 6, -14, -13, -12, -11, -10, -9, -8], // 0: 0x black (player1) off, 1x white (player2) bar
-    [], // 1: 2x white (player2)
-    [], // 2
-    [], // 3
+    [-14, -13, -12, -11, -10, -9, -8], // 0: 0x black (player1) off, 1x white (player2) bar
+    [-1, -2], // 1: 2x white (player2)
+    [-7, -6, -5, -4, -3], // 2
+    [-15], // 3
     [], // 4
     [], // 5
     [], // 6: 5x black (player1)
@@ -14,20 +14,20 @@ void main() {
     [], // 9
     [], // 10
     [], // 11
-    [7], // 12: 5x white (player2)
-    [-7, -6, -5, -4, -3], // 13: 5x black (player1)
+    [], // 12: 5x white (player2)
+    [], // 13: 5x black (player1)
     [], // 14
     [], // 15
     [], // 16
-    [8, 9, 10], // 17: 3x white (player2)
+    [], // 17: 3x white (player2)
     [], // 18
-    [11, 12, 13, 14, 15], // 19: 5x white (player2)
-    [], // 20
-    [], // 21
+    [1, 2, 3, 4, 5, 6], // 19: 5x white (player2)
+    [7], // 20
+    [8, 9], // 21
     [], // 22
     [], // 23
-    [-1, -2], // 24: 2x black (player1)
-    [-15], // 25: 2x black (player1) bar, 0x white (player2) off
+    [], // 24: 2x black (player1)
+    [11, 12, 10, 13, 14, 15], // 25: 2x black (player1) bar, 0x white (player2) off
   ];
 
   print(boardToString(board));
@@ -35,7 +35,7 @@ void main() {
 
 String boardToString(List<List<int>> board) {
   final lines = List<String>.filled(13, null);
-  lines[00] = '+13-14-15-16-17-18-+-B-+-19-20-21-22-23-24-+-H-+';
+  lines[00] = '+13-14-15-16-17-18-+-B-+-19-20-21-22-23-24-+-O-+';
   lines[01] = '|                  |   |                   |   |';
   lines[02] = '|                  |   |                   |   |';
   lines[03] = '|                  |   |                   |   |';
@@ -65,7 +65,10 @@ String boardToString(List<List<int>> board) {
     final color = board[pip][0] < 0 ? 'X' : 'O';
 
     for (final pieceID in board[pip]) {
+      // ensure there aren't any pieces of the wrong color on this pip
       assert(pieceID.sign == board[pip][0].sign);
+
+      // track the pieces we find, looking for dups or missing pieces
       found(pieceID);
     }
 
@@ -116,10 +119,18 @@ String boardToString(List<List<int>> board) {
 
   // player1 off
   {
-    final pipPieces = board[0].where((pid) => pid < 0);
+    final sign = -1;
+    final pipPieces = board[0].where((pid) => pid.sign == sign);
     final pieces = pipPieces.length;
     for (final pieceID in pipPieces) {
       found(pieceID);
+    }
+
+    // if we've got off pieces, ensure there aren't any pieces outside the home board
+    if (pieces > 0) {
+      for (var pip in List<int>.generate(19, (i) => 25 - i)) {
+        assert(board[pip].isEmpty || board[pip][0].sign != sign, 'found X pieces outside home board on pip $pip');
+      }
     }
 
     for (var i = 0; i != math.min(pieces, 5); ++i) {
@@ -135,19 +146,27 @@ String boardToString(List<List<int>> board) {
 
   // player2 off
   {
-    final pipPieces = board[25].where((pid) => pid > 0);
+    final sign = 1;
+    final pipPieces = board[25].where((pid) => pid.sign == sign);
     final pieces = pipPieces.length;
     for (final pieceID in pipPieces) {
       found(pieceID);
     }
 
+    // if we've got off pieces, ensure there aren't any pieces outside the home board
+    if (pieces > 0) {
+      for (var pip in List<int>.generate(19, (i) => 0 + i)) {
+        assert(board[pip].isEmpty || board[pip][0].sign != sign, 'found O pieces outside home board on pip $pip');
+      }
+    }
+
     for (var i = 0; i != math.min(pieces, 5); ++i) {
-      lines[i + 1] = lines[i + 1].replaceAt(30, 'O');
+      lines[i + 1] = lines[i + 1].replaceAt(45, 'O');
     }
 
     if (pieces > 5) {
       final pileup = pieces.toString();
-      lines[4 + 1] = lines[4 + 1].replaceAt(30, pileup);
+      lines[4 + 1] = lines[4 + 1].replaceAt(45, pileup);
       assert(pileup.length == 1, 'Not handling two-digit pileups');
     }
   }
