@@ -1,9 +1,10 @@
 import 'dart:math' as math;
+import 'package:meta/meta.dart';
 import 'package:dartx/dartx.dart';
 
 void main() {
   final board = <List<int>>[
-    [-14, -13, -12, -11, -10, -9, -8], // 0: 0x black (player1) off, 1x white (player2) bar
+    [11], // 0: 0x black (player1) off, 1x white (player2) bar
     [-1, -2], // 1: 2x white (player2)
     [-7, -6, -5, -4, -3], // 2
     [-15], // 3
@@ -27,8 +28,8 @@ void main() {
     [8, 9], // 21
     [], // 22
     [], // 23
-    [], // 24: 2x black (player1)
-    [11, 12, 10, 13, 14, 15], // 25: 2x black (player1) bar, 0x white (player2) off
+    [12, 10, 13, 14, 15], // 24: 2x black (player1)
+    [-14, -13, -12, -11, -10, -9, -8], // 25: 2x black (player1) bar, 0x white (player2) off
   ];
 
   print(boardToDart(board));
@@ -129,6 +130,53 @@ List<List<int>> linesToBoard(List<String> lines) {
   return board;
 }
 
+void _lineVert({
+  @required List<String> lines,
+  @required int dx,
+  @required int dy,
+  @required String char,
+  @required int length,
+  @required int dir,
+}) {
+  assert(lines != null);
+  assert(lines.length == 13);
+  assert(dx != null);
+  assert(dx >= 0 && dx <= 47);
+  assert(dy != null);
+  assert(dy >= 0 && dy <= 12);
+  assert(char != null);
+  assert(char.length == 1);
+  assert(dir == 1 || dir == -1);
+
+  for (var i = 0; i != math.min(length, 5); ++i) {
+    lines[dy + i * dir] = lines[dy + i * dir].replaceAt(dx, char);
+  }
+
+  if (length > 5) {
+    final pileup = length.toString();
+    assert(pileup.length == 1, 'Not handling two-digit pileups');
+    lines[dy + 4 * dir] = lines[dy + 4 * dir].replaceAt(dx, pileup);
+  }
+}
+
+void _lineUp({
+  @required List<String> lines,
+  @required int dx,
+  @required int dy,
+  @required String char,
+  @required int length,
+}) =>
+    _lineVert(lines: lines, dx: dx, dy: dy, char: char, length: length, dir: -1);
+
+void _lineDown({
+  @required List<String> lines,
+  @required int dx,
+  @required int dy,
+  @required String char,
+  @required int length,
+}) =>
+    _lineVert(lines: lines, dx: dx, dy: dy, char: char, length: length, dir: 1);
+
 List<String> boardToLines(List<List<int>> board) {
   checkBoard(board);
 
@@ -199,71 +247,13 @@ List<String> boardToLines(List<List<int>> board) {
     }
   }
 
-  // player1 off
-  {
-    final sign = -1;
-    final pipPieces = board[0].where((pid) => pid.sign == sign);
-    final pieces = pipPieces.length;
+  // player1 and player2 off
+  _lineUp(lines: lines, dx: 45, dy: 11, char: 'X', length: board[0].where((pid) => pid < 0).length);
+  _lineDown(lines: lines, dx: 45, dy: 1, char: 'O', length: board[25].where((pid) => pid > 0).length);
 
-    for (var i = 0; i != math.min(pieces, 5); ++i) {
-      lines[11 - i] = lines[11 - i].replaceAt(45, 'X');
-    }
-
-    if (pieces > 5) {
-      final pileup = pieces.toString();
-      lines[8 - 1] = lines[8 - 1].replaceAt(45, pileup);
-      assert(pileup.length == 1, 'Not handling two-digit pileups');
-    }
-  }
-
-  // player2 off
-  {
-    final sign = 1;
-    final pipPieces = board[25].where((pid) => pid.sign == sign);
-    final pieces = pipPieces.length;
-
-    for (var i = 0; i != math.min(pieces, 5); ++i) {
-      lines[i + 1] = lines[i + 1].replaceAt(45, 'O');
-    }
-
-    if (pieces > 5) {
-      final pileup = pieces.toString();
-      lines[4 + 1] = lines[4 + 1].replaceAt(45, pileup);
-      assert(pileup.length == 1, 'Not handling two-digit pileups');
-    }
-  }
-
-  // player1 bar
-  {
-    final pipPieces = board[25].where((pid) => pid < 0);
-    final pieces = pipPieces.length;
-
-    for (var x = 0; x != math.min(pieces, 5); ++x) {
-      lines[x + 1] = lines[x + 1].replaceAt(21, 'X');
-    }
-
-    if (pieces > 5) {
-      final pileup = pieces.toString();
-      lines[4 + 1] = lines[4 + 1].replaceAt(21, pileup);
-      assert(pileup.length == 1, 'Not handling two-digit pileups');
-    }
-  }
-
-  // player2 bar
-  {
-    final pipPieces = board[0].where((pid) => pid > 0);
-    final pieces = pipPieces.length;
-
-    for (var o = 0; o != math.min(pieces, 5); ++o) {
-      lines[11 - o] = lines[11 - o].replaceAt(21, 'O');
-    }
-
-    if (pieces > 5) {
-      final pileup = pieces.toString();
-      lines[8 - 1] = lines[8 - 1].replaceAt(21, pileup);
-      assert(pileup.length == 1, 'Not handling two-digit pileups');
-    }
-  }
+  // player1 and player2 bar
+  _lineUp(lines: lines, dx: 21, dy: 11, char: 'X', length: board[25].where((pid) => pid < 0).length);
+  _lineDown(lines: lines, dx: 21, dy: 1, char: 'O', length: board[0].where((pid) => pid > 0).length);
 
   return lines;
 }
