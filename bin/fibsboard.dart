@@ -2,19 +2,19 @@ import 'dart:math' as math;
 
 void main() {
   final board = <List<int>>[
-    [], // 0: 0x black (player1) home, 1x white (player2) bar
-    [1, 2], // 1: 2x white (player2)
+    [1, 2, 3, 4, 5, 6], // 0: 0x black (player1) home, 1x white (player2) bar
+    [], // 1: 2x white (player2)
     [], // 2
     [], // 3
     [], // 4
     [], // 5
-    [-15, -14, -13, -12, -11], // 6: 5x black (player1)
+    [-14, -13, -12, -11], // 6: 5x black (player1)
     [], // 7
     [-10, -9, -8], // 8: 3x black (player1)
     [], // 9
     [], // 10
     [], // 11
-    [3, 4, 5, 6, 7], // 12: 5x white (player2)
+    [7], // 12: 5x white (player2)
     [-7, -6, -5, -4, -3], // 13: 5x black (player1)
     [], // 14
     [], // 15
@@ -27,7 +27,7 @@ void main() {
     [], // 22
     [], // 23
     [-1, -2], // 24: 2x black (player1)
-    [], // 25: 2x black (player1) bar, 0x white (player2) home
+    [-15], // 25: 2x black (player1) bar, 0x white (player2) home
   ];
 
   print(boardToString(board));
@@ -51,6 +51,12 @@ String boardToString(List<List<int>> board) {
 
   // make sure we got 'em all
   final foundPieceIDs = List<List<bool>>.generate(2, (_) => List<bool>.filled(15, false));
+  void found(int pieceID) {
+    print('found($pieceID)');
+    assert(pieceID.abs() >= 1 && pieceID.abs() <= 15);
+    assert(!foundPieceIDs[pieceID < 0 ? 0 : 1][pieceID.abs() - 1], 'duplicate pieceID: $pieceID');
+    foundPieceIDs[pieceID < 0 ? 0 : 1][pieceID.abs() - 1] = true;
+  }
 
   // board pips
   for (var pip = 1; pip != 25; ++pip) {
@@ -60,9 +66,8 @@ String boardToString(List<List<int>> board) {
     final color = board[pip][0] < 0 ? 'X' : 'O';
 
     for (final pieceID in board[pip]) {
-      assert(pieceID.abs() >= 1 && pieceID.abs() <= 15);
       assert(pieceID.sign == board[pip][0].sign);
-      foundPieceIDs[color == 'X' ? 0 : 1][pieceID.abs() - 1] = true;
+      found(pieceID);
     }
 
     if (pip >= 13 && pip <= 18) {
@@ -108,18 +113,48 @@ String boardToString(List<List<int>> board) {
     } else {
       assert(false, 'pip out of range: $pip');
     }
+  }
 
-    // player1 home
-    // TODO
+  // player1 home
+  // TODO
 
-    // player2 home
-    // TODO
+  // player2 home
+  // TODO
 
-    // player1 bar
-    // TODO
+  // player1 bar
+  {
+    final p1barPieces = board[25].where((pid) => pid < 0).length;
+    for (final pieceID in board[25].where((pid) => pid < 0)) {
+      found(pieceID);
+    }
 
-    // player2 bar
-    // TODO
+    for (var x = 0; x != math.min(p1barPieces, 5); ++x) {
+      lines[x + 1] = lines[x + 1].replaceAt(21, 'X');
+    }
+
+    if (p1barPieces > 5) {
+      final pileup = p1barPieces.toString();
+      lines[4 + 1] = lines[4 + 1].replaceAt(21, pileup);
+      assert(pileup.length == 1, 'Not handling two-digit pileups');
+    }
+  }
+
+  // player2 bar
+  {
+    final p2barPieces = board[0].where((pid) => pid > 0).length;
+    for (final pieceID in board[0].where((pid) => pid > 0)) {
+      found(pieceID);
+    }
+
+    for (var o = 0; o != math.min(p2barPieces, 5); ++o) {
+      lines[11 - o] = lines[11 - o].replaceAt(21, 'O');
+    }
+
+    if (p2barPieces > 5) {
+      final pileup = p2barPieces.toString();
+      lines[8 - 1] = lines[8 - 1].replaceAt(21, pileup);
+      assert(pileup.length == 1, 'Not handling two-digit pileups');
+    }
   }
 
   assert(foundPieceIDs.length == 2);
