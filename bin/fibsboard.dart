@@ -53,10 +53,14 @@ void main() {
 +12-11-10--9--8--7-+---+--6--5--4--3--2--1-+---+
 ''';
 
-  print(boardToDart(linesToBoard(s.split('\n').skip(1).toList())));
+  print(linesToBoard(s.split('\n').skip(1).toList()));
+
+  // print(boardToDart(linesToBoard(s.split('\n').skip(1).toList()))); // TODO
 }
 
 String boardToDart(List<List<int>> board) {
+  checkBoard(board);
+
   String pipLine(int pip) {
     final sb = StringBuffer();
     final p1pieces = board[pip].where((pid) => pid < 0).length;
@@ -103,10 +107,13 @@ List<List<int>> linesToBoard(List<String> lines) {
 
   // TODO
 
+  // checkBoard(board); // TODO
   return board;
 }
 
 List<String> boardToLines(List<List<int>> board) {
+  checkBoard(board);
+
   final lines = List<String>.filled(13, null);
   lines[00] = '+13-14-15-16-17-18-+-B-+-19-20-21-22-23-24-+-O-+';
   lines[01] = '|                  |   |                   |   |';
@@ -122,28 +129,12 @@ List<String> boardToLines(List<List<int>> board) {
   lines[11] = '|                  |   |                   |   |';
   lines[12] = '+12-11-10--9--8--7-+---+--6--5--4--3--2--1-+---+';
 
-  // track the pieces we find
-  final foundPieceIDs = List<List<bool>>.generate(2, (_) => List<bool>.filled(15, false));
-  void found(int pieceID) {
-    assert(pieceID.abs() >= 1 && pieceID.abs() <= 15);
-    assert(!foundPieceIDs[pieceID < 0 ? 0 : 1][pieceID.abs() - 1], 'duplicate pieceID: $pieceID');
-    foundPieceIDs[pieceID < 0 ? 0 : 1][pieceID.abs() - 1] = true;
-  }
-
   // board pips
   for (var pip = 1; pip != 25; ++pip) {
     final pieces = board[pip].length;
     if (pieces == 0) continue;
 
     final color = board[pip][0] < 0 ? 'X' : 'O';
-
-    for (final pieceID in board[pip]) {
-      // ensure there aren't any pieces of the wrong color on this pip
-      assert(pieceID.sign == board[pip][0].sign);
-
-      // track the pieces we find, looking for dups or missing pieces
-      found(pieceID);
-    }
 
     if (pip >= 13 && pip <= 18) {
       for (var i = 0; i != math.min(pieces, 5); ++i) {
@@ -186,7 +177,103 @@ List<String> boardToLines(List<List<int>> board) {
         assert(pileup.length == 1, 'Not handling two-digit pileups');
       }
     } else {
-      assert(false, 'pip out of range: $pip');
+      assert(false, 'unreachable');
+    }
+  }
+
+  // player1 off
+  {
+    final sign = -1;
+    final pipPieces = board[0].where((pid) => pid.sign == sign);
+    final pieces = pipPieces.length;
+
+    for (var i = 0; i != math.min(pieces, 5); ++i) {
+      lines[11 - i] = lines[11 - i].replaceAt(45, 'X');
+    }
+
+    if (pieces > 5) {
+      final pileup = pieces.toString();
+      lines[8 - 1] = lines[8 - 1].replaceAt(45, pileup);
+      assert(pileup.length == 1, 'Not handling two-digit pileups');
+    }
+  }
+
+  // player2 off
+  {
+    final sign = 1;
+    final pipPieces = board[25].where((pid) => pid.sign == sign);
+    final pieces = pipPieces.length;
+
+    for (var i = 0; i != math.min(pieces, 5); ++i) {
+      lines[i + 1] = lines[i + 1].replaceAt(45, 'O');
+    }
+
+    if (pieces > 5) {
+      final pileup = pieces.toString();
+      lines[4 + 1] = lines[4 + 1].replaceAt(45, pileup);
+      assert(pileup.length == 1, 'Not handling two-digit pileups');
+    }
+  }
+
+  // player1 bar
+  {
+    final pipPieces = board[25].where((pid) => pid < 0);
+    final pieces = pipPieces.length;
+
+    for (var x = 0; x != math.min(pieces, 5); ++x) {
+      lines[x + 1] = lines[x + 1].replaceAt(21, 'X');
+    }
+
+    if (pieces > 5) {
+      final pileup = pieces.toString();
+      lines[4 + 1] = lines[4 + 1].replaceAt(21, pileup);
+      assert(pileup.length == 1, 'Not handling two-digit pileups');
+    }
+  }
+
+  // player2 bar
+  {
+    final pipPieces = board[0].where((pid) => pid > 0);
+    final pieces = pipPieces.length;
+
+    for (var o = 0; o != math.min(pieces, 5); ++o) {
+      lines[11 - o] = lines[11 - o].replaceAt(21, 'O');
+    }
+
+    if (pieces > 5) {
+      final pileup = pieces.toString();
+      lines[8 - 1] = lines[8 - 1].replaceAt(21, pileup);
+      assert(pileup.length == 1, 'Not handling two-digit pileups');
+    }
+  }
+
+  return lines;
+}
+
+extension on String {
+  String replaceAt(int index, String s) => substring(0, index) + s + substring(index + 1);
+}
+
+void checkBoard(List<List<int>> board) {
+  // track the pieces we find
+  final foundPieceIDs = List<List<bool>>.generate(2, (_) => List<bool>.filled(15, false));
+  void found(int pieceID) {
+    assert(pieceID.abs() >= 1 && pieceID.abs() <= 15);
+    assert(!foundPieceIDs[pieceID < 0 ? 0 : 1][pieceID.abs() - 1], 'duplicate pieceID: $pieceID');
+    foundPieceIDs[pieceID < 0 ? 0 : 1][pieceID.abs() - 1] = true;
+  }
+
+  // board pips
+  for (var pip = 1; pip != 25; ++pip) {
+    final pieces = board[pip].length;
+    if (pieces == 0) continue;
+
+    for (final pieceID in board[pip]) {
+      // ensure there aren't any pieces of the wrong color on this pip
+      assert(pieceID.sign == board[pip][0].sign);
+
+      // track the pieces we find, looking for dups or missing pieces
+      found(pieceID);
     }
   }
 
@@ -205,16 +292,6 @@ List<String> boardToLines(List<List<int>> board) {
         assert(board[pip].isEmpty || board[pip][0].sign != sign, 'found X pieces outside home board on pip $pip');
       }
     }
-
-    for (var i = 0; i != math.min(pieces, 5); ++i) {
-      lines[11 - i] = lines[11 - i].replaceAt(45, 'X');
-    }
-
-    if (pieces > 5) {
-      final pileup = pieces.toString();
-      lines[8 - 1] = lines[8 - 1].replaceAt(45, pileup);
-      assert(pileup.length == 1, 'Not handling two-digit pileups');
-    }
   }
 
   // player2 off
@@ -232,53 +309,21 @@ List<String> boardToLines(List<List<int>> board) {
         assert(board[pip].isEmpty || board[pip][0].sign != sign, 'found O pieces outside home board on pip $pip');
       }
     }
-
-    for (var i = 0; i != math.min(pieces, 5); ++i) {
-      lines[i + 1] = lines[i + 1].replaceAt(45, 'O');
-    }
-
-    if (pieces > 5) {
-      final pileup = pieces.toString();
-      lines[4 + 1] = lines[4 + 1].replaceAt(45, pileup);
-      assert(pileup.length == 1, 'Not handling two-digit pileups');
-    }
   }
 
   // player1 bar
   {
     final pipPieces = board[25].where((pid) => pid < 0);
-    final pieces = pipPieces.length;
     for (final pieceID in pipPieces) {
       found(pieceID);
-    }
-
-    for (var x = 0; x != math.min(pieces, 5); ++x) {
-      lines[x + 1] = lines[x + 1].replaceAt(21, 'X');
-    }
-
-    if (pieces > 5) {
-      final pileup = pieces.toString();
-      lines[4 + 1] = lines[4 + 1].replaceAt(21, pileup);
-      assert(pileup.length == 1, 'Not handling two-digit pileups');
     }
   }
 
   // player2 bar
   {
     final pipPieces = board[0].where((pid) => pid > 0);
-    final pieces = pipPieces.length;
     for (final pieceID in pipPieces) {
       found(pieceID);
-    }
-
-    for (var o = 0; o != math.min(pieces, 5); ++o) {
-      lines[11 - o] = lines[11 - o].replaceAt(21, 'O');
-    }
-
-    if (pieces > 5) {
-      final pileup = pieces.toString();
-      lines[8 - 1] = lines[8 - 1].replaceAt(21, pileup);
-      assert(pileup.length == 1, 'Not handling two-digit pileups');
     }
   }
 
@@ -291,10 +336,4 @@ List<String> boardToLines(List<List<int>> board) {
       assert(foundPieceIDs[i][j], 'missing pieceID: $pieceID');
     }
   }
-
-  return lines;
-}
-
-extension on String {
-  String replaceAt(int index, String s) => substring(0, index) + s + substring(index + 1);
 }
