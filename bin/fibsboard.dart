@@ -39,7 +39,7 @@ void main() {
   print('');
 
   final s = '''
-+13-14-15-16-17-18-+-B-+-19-20-21-22-23-24-+-O-+
++13-14-15-16-17-18-+BAR+-19-20-21-22-23-24-+OFF+
 |                  |   |  O  O  O          | O |
 |                  |   |  O     O          | O |
 |                  |   |  O                | O |
@@ -54,7 +54,7 @@ void main() {
 +12-11-10--9--8--7-+---+--6--5--4--3--2--1-+---+
 ''';
 
-  print(linesToBoard(s.split('\n').skip(1).toList()));
+  print(linesToBoard(s.split('\n').take(13).toList()));
 
   // print(boardToDart(linesToBoard(s.split('\n').skip(1).toList()))); // TODO
 }
@@ -323,4 +323,14 @@ void checkBoard(List<List<int>> board) {
   }
 }
 
-void checkLines(List<String> lines) {}
+void checkLines(List<String> lines) {
+  final tlines = _boardTemplate.split('\n').take(13).toList();
+  assert(lines.length == 13);
+  assert(tlines.length == 13);
+  for (var i = 0; i != lines.length; ++i) {
+    assert(lines[i].length == tlines[i].length);
+    for (var j = 0; j != lines[i].length; ++j) {
+      assert(tlines[i][j] == '.' || tlines[i][j] == lines[i][j]);
+    }
+  }
+}
