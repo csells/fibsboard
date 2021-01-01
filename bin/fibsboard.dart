@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:dartx/dartx.dart';
 
 void main() {
   final board = <List<int>>[
@@ -30,10 +31,82 @@ void main() {
     [11, 12, 10, 13, 14, 15], // 25: 2x black (player1) bar, 0x white (player2) off
   ];
 
-  print(boardToString(board));
+  print(boardToDart(board));
+
+  print(boardToLines(board).join('\n'));
+
+  print('');
+
+  final s = '''
++13-14-15-16-17-18-+-B-+-19-20-21-22-23-24-+-O-+
+|                  |   |  O  O  O          | O |
+|                  |   |  O     O          | O |
+|                  |   |  O                | O |
+|                  |   |  O                | O |
+|                  |   |  6                | 6 |
+|                  |   |                   |   |
+|                  |   |              X    | 7 |
+|                  |   |              X    | X |
+|                  |   |              X    | X |
+|                  |   |              X  X | X |
+|                  |   |           X  X  X | X |
++12-11-10--9--8--7-+---+--6--5--4--3--2--1-+---+
+''';
+
+  print(boardToDart(linesToBoard(s.split('\n').skip(1).toList())));
 }
 
-String boardToString(List<List<int>> board) {
+String boardToDart(List<List<int>> board) {
+  String pipLine(int pip) {
+    final sb = StringBuffer();
+    final p1pieces = board[pip].where((pid) => pid < 0).length;
+    final p2pieces = board[pip].where((pid) => pid > 0).length;
+    final p1label = p1pieces == 0 ? null : '${p1pieces}x player1';
+    final p2label = p2pieces == 0 ? null : '${p2pieces}x player2';
+    final labels = [if (p1label != null) p1label, if (p2label != null) p2label];
+
+    sb.write('  [');
+    sb.write(board[pip].sorted().map((pid) => pid.toString()).join(', '));
+    sb.writeln('], // $pip: ${labels.join(", ")}');
+
+    return sb.toString();
+  }
+
+  final sb = StringBuffer();
+  sb.writeln('final board = <List<int>>[');
+
+  {
+    sb.writeln('');
+    sb.writeln('  // player1 off, player2 bar');
+    sb.write(pipLine(0));
+  }
+
+  sb.writeln('');
+  sb.writeln('  // board pips'); // TODO: split this up
+  for (var pip = 1; pip != 25; ++pip) {
+    sb.write(pipLine(pip));
+  }
+
+  {
+    sb.writeln('');
+    sb.writeln('  // player1 off, player2 bar');
+    sb.write(pipLine(25));
+  }
+
+  sb.writeln('');
+  sb.writeln('];');
+  return sb.toString();
+}
+
+List<List<int>> linesToBoard(List<String> lines) {
+  final board = List<List<int>>.generate(26, (_) => []);
+
+  // TODO
+
+  return board;
+}
+
+List<String> boardToLines(List<List<int>> board) {
   final lines = List<String>.filled(13, null);
   lines[00] = '+13-14-15-16-17-18-+-B-+-19-20-21-22-23-24-+-O-+';
   lines[01] = '|                  |   |                   |   |';
@@ -219,7 +292,7 @@ String boardToString(List<List<int>> board) {
     }
   }
 
-  return lines.join('\n');
+  return lines;
 }
 
 extension on String {
