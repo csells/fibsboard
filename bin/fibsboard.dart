@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 void main() {
   final board = <List<int>>[
-    [1, 2, 3, 4, 5, 6, -14, -13, -12, -11, -10, -9, -8], // 0: 0x black (player1) home, 1x white (player2) bar
+    [1, 2, 3, 4, 5, 6, -14, -13, -12, -11, -10, -9, -8], // 0: 0x black (player1) off, 1x white (player2) bar
     [], // 1: 2x white (player2)
     [], // 2
     [], // 3
@@ -27,7 +27,7 @@ void main() {
     [], // 22
     [], // 23
     [-1, -2], // 24: 2x black (player1)
-    [-15], // 25: 2x black (player1) bar, 0x white (player2) home
+    [-15], // 25: 2x black (player1) bar, 0x white (player2) off
   ];
 
   print(boardToString(board));
@@ -114,7 +114,7 @@ String boardToString(List<List<int>> board) {
     }
   }
 
-  // player1 home
+  // player1 off
   {
     final pipPieces = board[0].where((pid) => pid < 0);
     final pieces = pipPieces.length;
@@ -133,7 +133,7 @@ String boardToString(List<List<int>> board) {
     }
   }
 
-  // player2 home
+  // player2 off
   {
     final pipPieces = board[25].where((pid) => pid > 0);
     final pieces = pipPieces.length;
