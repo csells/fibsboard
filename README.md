@@ -48,7 +48,7 @@ final board = <List<int>>[
 
 # board text representation
 ```
-+13-14-15-16-17-18-+-B-+-19-20-21-22-23-24-+-O-+
++13-14-15-16-17-18-+BAR+-19-20-21-22-23-24-+OFF+
 |                  |   |  O  O  O          | O |
 |                  |   |  O     O          | O |
 |                  |   |  O                | O |
