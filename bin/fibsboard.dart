@@ -122,6 +122,7 @@ String boardToDart(List<List<int>> board) {
 }
 
 List<List<int>> linesToBoard(List<String> lines) {
+  checkLines(lines);
   final board = List<List<int>>.generate(26, (_) => []);
 
   // TODO
@@ -177,23 +178,27 @@ void _lineDown({
 }) =>
     _lineVert(lines: lines, dx: dx, dy: dy, char: char, length: length, dir: 1);
 
+const _boardTemplate = '''
++13-14-15-16-17-18-+BAR+-19-20-21-22-23-24-+OFF+
+| .  .  .  .  .  . | . |  .  .  .  .  .  . | . |
+| .  .  .  .  .  . | . |  .  .  .  .  .  . | . |
+| .  .  .  .  .  . | . |  .  .  .  .  .  . | . |
+| .  .  .  .  .  . | . |  .  .  .  .  .  . | . |
+| .  .  .  .  .  . | . |  .  .  .  .  .  . | . |
+|                  |   |                   |   |
+| .  .  .  .  .  . | . |  .  .  .  .  .  . | . |
+| .  .  .  .  .  . | . |  .  .  .  .  .  . | . |
+| .  .  .  .  .  . | . |  .  .  .  .  .  . | . |
+| .  .  .  .  .  . | . |  .  .  .  .  .  . | . |
+| .  .  .  .  .  . | . |  .  .  .  .  .  . | . |
++12-11-10--9--8--7-+---+--6--5--4--3--2--1-+---+
+''';
+
+List<String> _linesFromTemplate() => _boardTemplate.replaceAll('.', ' ').split('\n').take(13).toList();
+
 List<String> boardToLines(List<List<int>> board) {
   checkBoard(board);
-
-  final lines = List<String>.filled(13, null);
-  lines[00] = '+13-14-15-16-17-18-+-B-+-19-20-21-22-23-24-+-O-+';
-  lines[01] = '|                  |   |                   |   |';
-  lines[02] = '|                  |   |                   |   |';
-  lines[03] = '|                  |   |                   |   |';
-  lines[04] = '|                  |   |                   |   |';
-  lines[05] = '|                  |   |                   |   |';
-  lines[06] = '|                  |   |                   |   |';
-  lines[07] = '|                  |   |                   |   |';
-  lines[08] = '|                  |   |                   |   |';
-  lines[09] = '|                  |   |                   |   |';
-  lines[10] = '|                  |   |                   |   |';
-  lines[11] = '|                  |   |                   |   |';
-  lines[12] = '+12-11-10--9--8--7-+---+--6--5--4--3--2--1-+---+';
+  final lines = _linesFromTemplate();
 
   // board pips
   for (var pip = 1; pip != 25; ++pip) {
@@ -208,8 +213,7 @@ List<String> boardToLines(List<List<int>> board) {
     } else if (pip >= 7 && pip <= 12) {
       // player1 outer board
       _lineUp(lines: lines, dx: 17 - (pip - 7) * 3, dy: 11, char: color, length: pieces);
-    }
-    if (pip >= 13 && pip <= 18) {
+    } else if (pip >= 13 && pip <= 18) {
       // player2 outer board
       _lineDown(lines: lines, dx: 5 + (pip - 10) * 3, dy: 1, char: color, length: pieces);
     } else if (pip >= 19 && pip <= 24) {
@@ -318,3 +322,5 @@ void checkBoard(List<List<int>> board) {
     }
   }
 }
+
+void checkLines(List<String> lines) {}
