@@ -54,7 +54,7 @@ void main() {
 +12-11-10--9--8--7-+---+--6--5--4--3--2--1-+---+
 ''';
 
-  print(linesToBoard(s.split('\n').take(13).toList()));
+  print(linesToBoard(_linesFromString(s)));
 
   // print(boardToDart(linesToBoard(s.split('\n').skip(1).toList()))); // TODO
 }
@@ -194,7 +194,8 @@ const _boardTemplate = '''
 +12-11-10--9--8--7-+---+--6--5--4--3--2--1-+---+
 ''';
 
-List<String> _linesFromTemplate() => _boardTemplate.replaceAll('.', ' ').split('\n').take(13).toList();
+List<String> _linesFromString(String s) => s.split('\n').take(13).toList();
+List<String> _linesFromTemplate() => _linesFromString(_boardTemplate.replaceAll('.', ' '));
 
 List<String> boardToLines(List<List<int>> board) {
   checkBoard(board);
@@ -232,6 +233,7 @@ List<String> boardToLines(List<List<int>> board) {
   _lineUp(lines: lines, dx: 21, dy: 11, char: 'X', length: board[25].where((pid) => pid < 0).length);
   _lineDown(lines: lines, dx: 21, dy: 1, char: 'O', length: board[0].where((pid) => pid > 0).length);
 
+  checkLines(lines);
   return lines;
 }
 
