@@ -52,7 +52,6 @@ String boardToString(List<List<int>> board) {
   // make sure we got 'em all
   final foundPieceIDs = List<List<bool>>.generate(2, (_) => List<bool>.filled(15, false));
   void found(int pieceID) {
-    print('found($pieceID)');
     assert(pieceID.abs() >= 1 && pieceID.abs() <= 15);
     assert(!foundPieceIDs[pieceID < 0 ? 0 : 1][pieceID.abs() - 1], 'duplicate pieceID: $pieceID');
     foundPieceIDs[pieceID < 0 ? 0 : 1][pieceID.abs() - 1] = true;
@@ -123,17 +122,17 @@ String boardToString(List<List<int>> board) {
 
   // player1 bar
   {
-    final p1barPieces = board[25].where((pid) => pid < 0).length;
+    final pieces = board[25].where((pid) => pid < 0).length;
     for (final pieceID in board[25].where((pid) => pid < 0)) {
       found(pieceID);
     }
 
-    for (var x = 0; x != math.min(p1barPieces, 5); ++x) {
+    for (var x = 0; x != math.min(pieces, 5); ++x) {
       lines[x + 1] = lines[x + 1].replaceAt(21, 'X');
     }
 
-    if (p1barPieces > 5) {
-      final pileup = p1barPieces.toString();
+    if (pieces > 5) {
+      final pileup = pieces.toString();
       lines[4 + 1] = lines[4 + 1].replaceAt(21, pileup);
       assert(pileup.length == 1, 'Not handling two-digit pileups');
     }
@@ -141,17 +140,17 @@ String boardToString(List<List<int>> board) {
 
   // player2 bar
   {
-    final p2barPieces = board[0].where((pid) => pid > 0).length;
+    final pieces = board[0].where((pid) => pid > 0).length;
     for (final pieceID in board[0].where((pid) => pid > 0)) {
       found(pieceID);
     }
 
-    for (var o = 0; o != math.min(p2barPieces, 5); ++o) {
+    for (var o = 0; o != math.min(pieces, 5); ++o) {
       lines[11 - o] = lines[11 - o].replaceAt(21, 'O');
     }
 
-    if (p2barPieces > 5) {
-      final pileup = p2barPieces.toString();
+    if (pieces > 5) {
+      final pileup = pieces.toString();
       lines[8 - 1] = lines[8 - 1].replaceAt(21, pileup);
       assert(pileup.length == 1, 'Not handling two-digit pileups');
     }
