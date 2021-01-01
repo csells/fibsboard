@@ -2,15 +2,15 @@ import 'dart:math' as math;
 
 void main() {
   final board = <List<int>>[
-    [1, 2, 3, 4, 5, 6], // 0: 0x black (player1) home, 1x white (player2) bar
+    [1, 2, 3, 4, 5, 6, -14, -13, -12, -11, -10, -9, -8], // 0: 0x black (player1) home, 1x white (player2) bar
     [], // 1: 2x white (player2)
     [], // 2
     [], // 3
     [], // 4
     [], // 5
-    [-14, -13, -12, -11], // 6: 5x black (player1)
+    [], // 6: 5x black (player1)
     [], // 7
-    [-10, -9, -8], // 8: 3x black (player1)
+    [], // 8: 3x black (player1)
     [], // 9
     [], // 10
     [], // 11
@@ -35,7 +35,7 @@ void main() {
 
 String boardToString(List<List<int>> board) {
   final lines = List<String>.filled(13, null);
-  lines[00] = '+13-14-15-16-17-18-+---+-19-20-21-22-23-24-+---+';
+  lines[00] = '+13-14-15-16-17-18-+-B-+-19-20-21-22-23-24-+-H-+';
   lines[01] = '|                  |   |                   |   |';
   lines[02] = '|                  |   |                   |   |';
   lines[03] = '|                  |   |                   |   |';
@@ -49,7 +49,7 @@ String boardToString(List<List<int>> board) {
   lines[11] = '|                  |   |                   |   |';
   lines[12] = '+12-11-10--9--8--7-+---+--6--5--4--3--2--1-+---+';
 
-  // make sure we got 'em all
+  // track the pieces we find
   final foundPieceIDs = List<List<bool>>.generate(2, (_) => List<bool>.filled(15, false));
   void found(int pieceID) {
     assert(pieceID.abs() >= 1 && pieceID.abs() <= 15);
@@ -115,15 +115,48 @@ String boardToString(List<List<int>> board) {
   }
 
   // player1 home
-  // TODO
+  {
+    final pipPieces = board[0].where((pid) => pid < 0);
+    final pieces = pipPieces.length;
+    for (final pieceID in pipPieces) {
+      found(pieceID);
+    }
+
+    for (var i = 0; i != math.min(pieces, 5); ++i) {
+      lines[11 - i] = lines[11 - i].replaceAt(45, 'X');
+    }
+
+    if (pieces > 5) {
+      final pileup = pieces.toString();
+      lines[8 - 1] = lines[8 - 1].replaceAt(45, pileup);
+      assert(pileup.length == 1, 'Not handling two-digit pileups');
+    }
+  }
 
   // player2 home
-  // TODO
+  {
+    final pipPieces = board[25].where((pid) => pid > 0);
+    final pieces = pipPieces.length;
+    for (final pieceID in pipPieces) {
+      found(pieceID);
+    }
+
+    for (var i = 0; i != math.min(pieces, 5); ++i) {
+      lines[i + 1] = lines[i + 1].replaceAt(30, 'O');
+    }
+
+    if (pieces > 5) {
+      final pileup = pieces.toString();
+      lines[4 + 1] = lines[4 + 1].replaceAt(30, pileup);
+      assert(pileup.length == 1, 'Not handling two-digit pileups');
+    }
+  }
 
   // player1 bar
   {
-    final pieces = board[25].where((pid) => pid < 0).length;
-    for (final pieceID in board[25].where((pid) => pid < 0)) {
+    final pipPieces = board[25].where((pid) => pid < 0);
+    final pieces = pipPieces.length;
+    for (final pieceID in pipPieces) {
       found(pieceID);
     }
 
@@ -140,8 +173,9 @@ String boardToString(List<List<int>> board) {
 
   // player2 bar
   {
-    final pieces = board[0].where((pid) => pid > 0).length;
-    for (final pieceID in board[0].where((pid) => pid > 0)) {
+    final pipPieces = board[0].where((pid) => pid > 0);
+    final pieces = pipPieces.length;
+    for (final pieceID in pipPieces) {
       found(pieceID);
     }
 
@@ -156,6 +190,7 @@ String boardToString(List<List<int>> board) {
     }
   }
 
+  // check that we found all the pieces
   assert(foundPieceIDs.length == 2);
   for (var i = 0; i != 2; ++i) {
     assert(foundPieceIDs[i].length == 15);
