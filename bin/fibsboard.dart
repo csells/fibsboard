@@ -4,32 +4,43 @@ import 'package:dartx/dartx.dart';
 
 void main() {
   final board = <List<int>>[
-    [11], // 0: 0x black (player1) off, 1x white (player2) bar
-    [-1, -2], // 1: 2x white (player2)
-    [-7, -6, -5, -4, -3], // 2
-    [-15], // 3
-    [], // 4
-    [], // 5
-    [], // 6: 5x black (player1)
-    [], // 7
-    [], // 8: 3x black (player1)
-    [], // 9
-    [], // 10
-    [], // 11
-    [-14, -13, -12, -11, -10, -9, -8], // 12: 5x white (player2)
-    [1, 2, 3, 4, 5], // 13: 5x black (player1)
-    [6], // 14
-    [], // 15
-    [], // 16
-    [], // 17: 3x white (player2)
-    [], // 18
-    [], // 19: 5x white (player2)
-    [7], // 20
-    [8, 9], // 21
-    [], // 22
-    [], // 23
-    [12, 10, 13, 14, 15], // 24: 2x black (player1)
-    [], // 25: 2x black (player1) bar, 0x white (player2) off
+    // player1 off, player2 bar
+    [11], // 0: 1x player2
+
+    // player1 home board
+    [-2, -1], // 1: 2x player1
+    [-7, -6, -5, -4, -3], // 2: 5x player1
+    [-15], // 3: 1x player1
+    [], // 4:
+    [], // 5:
+    [], // 6:
+
+    // player1 outer board
+    [], // 7:
+    [], // 8:
+    [], // 9:
+    [], // 10:
+    [], // 11:
+    [-14, -13, -12, -11, -10, -9, -8], // 12: 7x player1
+
+    // player2 outer board
+    [1, 2, 3, 4, 5], // 13: 5x player2
+    [6], // 14: 1x player2
+    [], // 15:
+    [], // 16:
+    [], // 17:
+    [], // 18:
+
+    // player2 home board
+    [], // 19:
+    [7], // 20: 1x player2
+    [8, 9], // 21: 2x player2
+    [], // 22:
+    [], // 23:
+    [10, 12, 13, 14, 15], // 24: 5x player2
+
+    // player1 off, player2 bar
+    [], // 25:
   ];
 
   print(boardToDart(board));
@@ -40,17 +51,17 @@ void main() {
 
   final s = '''
 +13-14-15-16-17-18-+BAR+-19-20-21-22-23-24-+OFF+
-|                  |   |  O  O  O          | O |
-|                  |   |  O     O          | O |
-|                  |   |  O                | O |
-|                  |   |  O                | O |
-|                  |   |  6                | 6 |
+|             O  O | O |     O  O        O |   |
+|             O    |   |        O        O |   |
+|             O    |   |                 O |   |
+|             O    |   |                 O |   |
+|             O    |   |                 O |   |
 |                  |   |                   |   |
-|                  |   |              X    | 7 |
-|                  |   |              X    | X |
-|                  |   |              X    | X |
-|                  |   |              X  X | X |
-|                  |   |           X  X  X | X |
+| 7                |   |              X    |   |
+| X                |   |              X    |   |
+| X                |   |              X    |   |
+| X                |   |              X  X |   |
+| X                |   |           X  X  X |   |
 +12-11-10--9--8--7-+---+--6--5--4--3--2--1-+---+
 ''';
 
