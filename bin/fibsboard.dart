@@ -16,20 +16,20 @@ void main() {
     [], // 9
     [], // 10
     [], // 11
-    [], // 12: 5x white (player2)
-    [], // 13: 5x black (player1)
-    [], // 14
+    [-14, -13, -12, -11, -10, -9, -8], // 12: 5x white (player2)
+    [1, 2, 3, 4, 5], // 13: 5x black (player1)
+    [6], // 14
     [], // 15
     [], // 16
     [], // 17: 3x white (player2)
     [], // 18
-    [1, 2, 3, 4, 5, 6], // 19: 5x white (player2)
+    [], // 19: 5x white (player2)
     [7], // 20
     [8, 9], // 21
     [], // 22
     [], // 23
     [12, 10, 13, 14, 15], // 24: 2x black (player1)
-    [-14, -13, -12, -11, -10, -9, -8], // 25: 2x black (player1) bar, 0x white (player2) off
+    [], // 25: 2x black (player1) bar, 0x white (player2) off
   ];
 
   print(boardToDart(board));
@@ -202,46 +202,19 @@ List<String> boardToLines(List<List<int>> board) {
 
     final color = board[pip][0] < 0 ? 'X' : 'O';
 
-    if (pip >= 13 && pip <= 18) {
-      for (var i = 0; i != math.min(pieces, 5); ++i) {
-        lines[i + 1] = lines[i + 1].replaceAt(5 + (pip - 10) * 3, color);
-      }
-
-      if (pieces > 5) {
-        final pileup = pieces.toString();
-        lines[4 + 1] = lines[4 + 1].replaceAt(2 + (pip - 13) * 3, pileup);
-        assert(pileup.length == 1, 'Not handling two-digit pileups');
-      }
-    } else if (pip >= 19 && pip <= 24) {
-      for (var i = 0; i != math.min(pieces, 5); ++i) {
-        lines[i + 1] = lines[i + 1].replaceAt(26 + (pip - 19) * 3, color);
-      }
-
-      if (pieces > 5) {
-        final pileup = pieces.toString();
-        lines[4 + 1] = lines[4 + 1].replaceAt(26 + (pip - 19) * 3, pileup);
-        assert(pileup.length == 1, 'Not handling two-digit pileups');
-      }
-    } else if (pip >= 1 && pip <= 6) {
-      for (var i = 0; i != math.min(pieces, 5); ++i) {
-        lines[11 - i] = lines[11 - i].replaceAt(41 - (pip - 1) * 3, color);
-      }
-
-      if (pieces > 5) {
-        final pileup = pieces.toString();
-        lines[8 - 1] = lines[8 - 1].replaceAt(41 - (pip - 1) * 3, pileup);
-        assert(pileup.length == 1, 'Not handling two-digit pileups');
-      }
+    if (pip >= 1 && pip <= 6) {
+      // player1 home board
+      _lineUp(lines: lines, dx: 41 - (pip - 1) * 3, dy: 11, char: color, length: pieces);
     } else if (pip >= 7 && pip <= 12) {
-      for (var i = 0; i != math.min(pieces, 5); ++i) {
-        lines[11 - i] = lines[11 - i].replaceAt(17 - (pip - 7) * 3, color);
-      }
-
-      if (pieces > 5) {
-        final pileup = pieces.toString();
-        lines[8 - 1] = lines[8 - 1].replaceAt(17 - (pip - 7) * 3, pileup);
-        assert(pileup.length == 1, 'Not handling two-digit pileups');
-      }
+      // player1 outer board
+      _lineUp(lines: lines, dx: 17 - (pip - 7) * 3, dy: 11, char: color, length: pieces);
+    }
+    if (pip >= 13 && pip <= 18) {
+      // player2 outer board
+      _lineDown(lines: lines, dx: 5 + (pip - 10) * 3, dy: 1, char: color, length: pieces);
+    } else if (pip >= 19 && pip <= 24) {
+      // player2 home board
+      _lineDown(lines: lines, dx: 26 + (pip - 19) * 3, dy: 1, char: color, length: pieces);
     } else {
       assert(false, 'unreachable');
     }
