@@ -86,8 +86,26 @@ String boardToDart(List<List<int>> board) {
   }
 
   sb.writeln('');
-  sb.writeln('  // board pips'); // TODO: split this up
-  for (var pip = 1; pip != 25; ++pip) {
+  sb.writeln('  // player1 home board');
+  for (var pip = 1; pip != 7; ++pip) {
+    sb.write(pipLine(pip));
+  }
+
+  sb.writeln('');
+  sb.writeln('  // player1 outer board');
+  for (var pip = 7; pip != 13; ++pip) {
+    sb.write(pipLine(pip));
+  }
+
+  sb.writeln('');
+  sb.writeln('  // player2 outer board');
+  for (var pip = 13; pip != 19; ++pip) {
+    sb.write(pipLine(pip));
+  }
+
+  sb.writeln('');
+  sb.writeln('  // player2 home board');
+  for (var pip = 19; pip != 25; ++pip) {
     sb.write(pipLine(pip));
   }
 
