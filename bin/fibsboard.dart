@@ -63,9 +63,7 @@ void main() {
   print('');
   print(boardToLines(board).join('\n'));
   print('');
-  print(lines);
-  // print('');
-  // print(boardToDart(linesToBoard(lines)));
+  print(boardToDart(linesToBoard(lines)));
   // print(boardToLines(linesToBoard(lines)).join('\n'));
 }
 
@@ -199,7 +197,7 @@ Map<String, int> _readLineVert({
 
     if (char == 'X' || char == 'O') {
       assert(!pieceCount.containsKey(char == 'X' ? 'O' : 'X'));
-      pieceCount[char] = pieceCount[char] ?? 0 + 1;
+      pieceCount[char] = (pieceCount[char] ?? 0) + 1;
     } else if (_isDigit(char)) {
       assert(i == 4);
       if (oldChar == 'X' || oldChar == 'O') {
