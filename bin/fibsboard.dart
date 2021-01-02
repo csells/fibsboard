@@ -11,21 +11,34 @@ void main() {
 |             O    |   |                O |   |
 |             O    |   |                O |   |
 |                  |   |                  |   |
-| 7                |   |             X    |   |
-| X                |   |             X    |   |
-| X                |   |             X    |   |
-| X                |   |             X  X |   |
-| X                |   |          X  X  X |   |
+|                  |   | 9                | 6 |
+|                  |   | X                | X |
+|                  |   | X                | X |
+|                  |   | X                | X |
+|                  |   | X                | X |
 +12-11-10--9--8--7-+---+-6--5--4--3--2--1-+---+
 ''');
 
   final board = linesToBoard(lines);
-  print(boardToDart(board));
+  final lines2 = boardToLines(board);
+
+  assert(lines2.length == lines.length);
+  for (var i = 0; i != 13; ++i) {
+    assert(lines[i] == lines2[i]);
+  }
+
+  final board2 = linesToBoard(lines2);
+  assert(board2.length == board.length);
+  for (var i = 0; i != 26; ++i) {
+    assert(board2[i].length == board[i].length);
+    for (var j = 0; j != board[i].length; ++j) {
+      assert(board[i][j] == board2[i][j]);
+    }
+  }
+
+  print(boardToDart(board2));
   print('');
-  print(boardToLines(board).join('\n'));
-  print('');
-  print(boardToDart(linesToBoard(lines)));
-  print(boardToLines(linesToBoard(lines)).join('\n'));
+  print(lines2.join('\n'));
 }
 
 String boardToDart(List<List<int>> board) {
@@ -170,7 +183,9 @@ Map<String, int> _readLineVert({
       assert(i == 4);
       if (oldChar == 'X' || oldChar == 'O') {
         assert(!pieceCount.containsKey(oldChar == 'X' ? 'O' : 'X'));
-        pieceCount[oldChar] = int.parse(char);
+        final pieces = int.parse(char);
+        assert(pieces >= 6 && pieces <= 9);
+        pieceCount[oldChar] = pieces;
       } else {
         assert(false);
       }
