@@ -239,7 +239,8 @@ const _boardTemplate = '''
 +12-11-10--9--8--7-+---+-6--5--4--3--2--1-+---+
 ''';
 
-List<String> linesFromString(String s) => s.split('\n').take(13).toList();
+List<String> linesFromString(String s) => s.split('\n').where((l) => l.isNotEmpty).toList();
+String stringFromLines(Iterable<String> lines) => lines.join('\n');
 List<String> _linesFromTemplate() => linesFromString(_boardTemplate.replaceAll('.', ' '));
 
 List<String> linesFromBoard(List<List<int>> board) {

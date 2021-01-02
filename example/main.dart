@@ -23,5 +23,5 @@ void main() {
 
   print(fb.dartFromBoard(board2));
   print('');
-  print(lines2.join('\n'));
+  print(fb.stringFromLines(lines2));
 }
