@@ -3,46 +3,6 @@ import 'package:meta/meta.dart';
 import 'package:dartx/dartx.dart';
 
 void main() {
-  final board = <List<int>>[
-    // player1 off, player2 bar
-    [11], // 0: 1x player2
-
-    // player1 home board
-    [-2, -1], // 1: 2x player1
-    [-7, -6, -5, -4, -3], // 2: 5x player1
-    [-15], // 3: 1x player1
-    [], // 4:
-    [], // 5:
-    [], // 6:
-
-    // player1 outer board
-    [], // 7:
-    [], // 8:
-    [], // 9:
-    [], // 10:
-    [], // 11:
-    [-14, -13, -12, -11, -10, -9, -8], // 12: 7x player1
-
-    // player2 outer board
-    [1, 2, 3, 4, 5], // 13: 5x player2
-    [6], // 14: 1x player2
-    [], // 15:
-    [], // 16:
-    [], // 17:
-    [], // 18:
-
-    // player2 home board
-    [], // 19:
-    [7], // 20: 1x player2
-    [8, 9], // 21: 2x player2
-    [], // 22:
-    [], // 23:
-    [10, 12, 13, 14, 15], // 24: 5x player2
-
-    // player1 off, player2 bar
-    [], // 25:
-  ];
-
   final lines = _linesFromString('''
 +13-14-15-16-17-18-+BAR+19-20-21-22-23-24-+OFF+
 |             O  O | O |    O  O        O |   |
@@ -59,16 +19,17 @@ void main() {
 +12-11-10--9--8--7-+---+-6--5--4--3--2--1-+---+
 ''');
 
+  final board = linesToBoard(lines);
   print(boardToDart(board));
   print('');
   print(boardToLines(board).join('\n'));
   print('');
   print(boardToDart(linesToBoard(lines)));
-  // print(boardToLines(linesToBoard(lines)).join('\n'));
+  print(boardToLines(linesToBoard(lines)).join('\n'));
 }
 
 String boardToDart(List<List<int>> board) {
-  // checkBoard(board);
+  checkBoard(board);
 
   String pipLine(int pip) {
     final sb = StringBuffer();
@@ -133,29 +94,8 @@ List<List<int>> linesToBoard(List<String> lines) {
   checkLines(lines);
   final board = List<List<int>>.generate(26, (_) => []);
   final pieceCounts = <String, int>{'X': 0, 'O': 0};
-
-  // board pips
-  for (var pip = 1; pip != 25; ++pip) {
-    // final pieces = board[pip].length;
-
-    Map<String, int> pieceCount;
-    if (pip >= 1 && pip <= 6) {
-      // player1 home board
-      pieceCount = _readLineUp(lines: lines, dx: 40 - (pip - 1) * 3, dy: 11);
-    } else if (pip >= 7 && pip <= 12) {
-      // player1 outer board
-      pieceCount = _readLineUp(lines: lines, dx: 17 - (pip - 7) * 3, dy: 11);
-    } else if (pip >= 13 && pip <= 18) {
-      // player2 outer board
-      pieceCount = _readLineDown(lines: lines, dx: 2 + (pip - 13) * 3, dy: 1);
-    } else if (pip >= 19 && pip <= 24) {
-      // player2 home board
-      pieceCount = _readLineDown(lines: lines, dx: 25 + (pip - 19) * 3, dy: 1);
-    } else {
-      assert(false, 'unreachable');
-    }
-
-    if (pieceCount.isEmpty) continue;
+  void totalPieceCount(int pip, Map<String, int> pieceCount) {
+    if (pieceCount.isEmpty) return;
     assert(pieceCount.length == 1);
 
     final color = pieceCount.keys.single;
@@ -164,10 +104,38 @@ List<List<int>> linesToBoard(List<String> lines) {
       final pid = color == 'X' ? -(pieceCounts[color] + i + 1) : pieceCounts[color] + i + 1;
       board[pip].add(pid);
     }
+
     pieceCounts[color] += pieces;
   }
 
-  // checkBoard(board); // TODO
+  // board pips
+  for (var pip = 1; pip != 25; ++pip) {
+    if (pip >= 1 && pip <= 6) {
+      // player1 home board
+      totalPieceCount(pip, _readLineUp(lines: lines, dx: 40 - (pip - 1) * 3, dy: 11));
+    } else if (pip >= 7 && pip <= 12) {
+      // player1 outer board
+      totalPieceCount(pip, _readLineUp(lines: lines, dx: 17 - (pip - 7) * 3, dy: 11));
+    } else if (pip >= 13 && pip <= 18) {
+      // player2 outer board
+      totalPieceCount(pip, _readLineDown(lines: lines, dx: 2 + (pip - 13) * 3, dy: 1));
+    } else if (pip >= 19 && pip <= 24) {
+      // player2 home board
+      totalPieceCount(pip, _readLineDown(lines: lines, dx: 25 + (pip - 19) * 3, dy: 1));
+    } else {
+      assert(false, 'unreachable');
+    }
+  }
+
+  // player1 and player2 off
+  totalPieceCount(0, _readLineUp(lines: lines, dx: 44, dy: 11));
+  totalPieceCount(25, _readLineDown(lines: lines, dx: 44, dy: 1));
+
+  // player1 and player2 bar
+  totalPieceCount(25, _readLineUp(lines: lines, dx: 21, dy: 11));
+  totalPieceCount(0, _readLineDown(lines: lines, dx: 21, dy: 1));
+
+  checkBoard(board);
   return board;
 }
 
@@ -278,6 +246,7 @@ void _writeLineDown({
 }) =>
     _writeLineVert(lines: lines, dx: dx, dy: dy, char: char, length: length, dir: 1);
 
+// everything is a constant except the dots when can be replaced
 const _boardTemplate = '''
 +13-14-15-16-17-18-+BAR+19-20-21-22-23-24-+OFF+
 | .  .  .  .  .  . | . | .  .  .  .  .  . | . |
@@ -298,7 +267,7 @@ List<String> _linesFromString(String s) => s.split('\n').take(13).toList();
 List<String> _linesFromTemplate() => _linesFromString(_boardTemplate.replaceAll('.', ' '));
 
 List<String> boardToLines(List<List<int>> board) {
-  // checkBoard(board);
+  checkBoard(board);
   final lines = _linesFromTemplate();
 
   // board pips
@@ -326,8 +295,8 @@ List<String> boardToLines(List<List<int>> board) {
   }
 
   // player1 and player2 off
-  _writeLineUp(lines: lines, dx: 45, dy: 11, char: 'X', length: board[0].where((pid) => pid < 0).length);
-  _writeLineDown(lines: lines, dx: 45, dy: 1, char: 'O', length: board[25].where((pid) => pid > 0).length);
+  _writeLineUp(lines: lines, dx: 44, dy: 11, char: 'X', length: board[0].where((pid) => pid < 0).length);
+  _writeLineDown(lines: lines, dx: 44, dy: 1, char: 'O', length: board[25].where((pid) => pid > 0).length);
 
   // player1 and player2 bar
   _writeLineUp(lines: lines, dx: 21, dy: 11, char: 'X', length: board[25].where((pid) => pid < 0).length);
