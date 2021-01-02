@@ -2,46 +2,7 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 import 'package:dartx/dartx.dart';
 
-void main() {
-  final lines = _linesFromString('''
-+13-14-15-16-17-18-+BAR+19-20-21-22-23-24-+OFF+
-|             O  O | O |    O  O        O |   |
-|             O    |   |       O        O |   |
-|             O    |   |                O |   |
-|             O    |   |                O |   |
-|             O    |   |                O |   |
-|                  |   |                  |   |
-|                  |   | 9                | 6 |
-|                  |   | X                | X |
-|                  |   | X                | X |
-|                  |   | X                | X |
-|                  |   | X                | X |
-+12-11-10--9--8--7-+---+-6--5--4--3--2--1-+---+
-''');
-
-  final board = linesToBoard(lines);
-  final lines2 = boardToLines(board);
-
-  assert(lines2.length == lines.length);
-  for (var i = 0; i != 13; ++i) {
-    assert(lines[i] == lines2[i]);
-  }
-
-  final board2 = linesToBoard(lines2);
-  assert(board2.length == board.length);
-  for (var i = 0; i != 26; ++i) {
-    assert(board2[i].length == board[i].length);
-    for (var j = 0; j != board[i].length; ++j) {
-      assert(board[i][j] == board2[i][j]);
-    }
-  }
-
-  print(boardToDart(board2));
-  print('');
-  print(lines2.join('\n'));
-}
-
-String boardToDart(List<List<int>> board) {
+String dartFromBoard(List<List<int>> board) {
   checkBoard(board);
 
   String pipLine(int pip) {
@@ -103,7 +64,7 @@ String boardToDart(List<List<int>> board) {
   return sb.toString();
 }
 
-List<List<int>> linesToBoard(List<String> lines) {
+List<List<int>> boardFromLines(List<String> lines) {
   checkLines(lines);
   final board = List<List<int>>.generate(26, (_) => []);
   final pieceCounts = <String, int>{'X': 0, 'O': 0};
@@ -278,10 +239,10 @@ const _boardTemplate = '''
 +12-11-10--9--8--7-+---+-6--5--4--3--2--1-+---+
 ''';
 
-List<String> _linesFromString(String s) => s.split('\n').take(13).toList();
-List<String> _linesFromTemplate() => _linesFromString(_boardTemplate.replaceAll('.', ' '));
+List<String> linesFromString(String s) => s.split('\n').take(13).toList();
+List<String> _linesFromTemplate() => linesFromString(_boardTemplate.replaceAll('.', ' '));
 
-List<String> boardToLines(List<List<int>> board) {
+List<String> linesFromBoard(List<List<int>> board) {
   checkBoard(board);
   final lines = _linesFromTemplate();
 
