@@ -1,6 +1,14 @@
 import 'dart:math' as math;
 import 'package:dartx/dartx.dart';
 
+/// Converts a board representation as a 2D list of ints into a Dart string
+/// that can be used to initialize a board variable.
+///
+/// Parameters:
+///
+/// - board: The 2D list representing the board.
+///
+/// Returns: A Dart string representing the board initialization code.
 String dartFromBoard(List<List<int>> board) {
   checkBoard(board);
 
@@ -63,6 +71,16 @@ String dartFromBoard(List<List<int>> board) {
   return sb.toString();
 }
 
+/// Converts a textual representation of a board into a 2D list representation.
+///
+/// The input is a list of 13 lines representing the board. Each line contains
+/// piece positions marked with 'X' and 'O'.
+///
+/// Parameters:
+///
+/// lines - The input list of 13 board lines.
+///
+/// Returns: A 2D list representing the parsed board.
 List<List<int>> boardFromLines(List<String> lines) {
   checkLines(lines);
   final board = List<List<int>>.generate(26, (_) => []);
@@ -239,12 +257,45 @@ const _boardTemplate = '''
 +12-11-10--9--8--7-+---+-6--5--4--3--2--1-+---+
 ''';
 
+/// Parses a string containing 13 lines representing a Fibs board into a
+/// list of board line strings.
+///
+/// The string is expected to contain Unix-style (\n) line endings. Empty
+/// lines are ignored.
+///
+/// Parameters:
+///
+/// input - The input string containing the board lines
+///
+/// Returns: A list of the 13 non-empty board line strings
 List<String> linesFromString(String s) =>
     s.split('\n').where((l) => l.isNotEmpty).toList();
+
+/// Converts a list of board line strings into a single string
+/// representing the board.
+///
+/// Joins the line strings together with Unix-style (\n) newlines.
+///
+/// Parameters:
+///
+/// lines - The list of board line strings
+///
+/// Returns: The joined string representing the board.
 String stringFromLines(Iterable<String> lines) => lines.join('\n');
+
 List<String> _linesFromTemplate() =>
     linesFromString(_boardTemplate.replaceAll('.', ' '));
 
+/// Converts a 2D list board representation into a list of line strings.
+///
+/// The board is rendered into 13 lines showing the piece positions. Empty
+/// points are rendered as dots, and pieces are shown as 'X' and 'O'.
+///
+/// Parameters:
+///
+/// board - The 2D list representing the board
+///
+/// Returns: A list containing the 13 line strings
 List<String> linesFromBoard(List<List<int>> board) {
   checkBoard(board);
   final lines = _linesFromTemplate();
@@ -330,6 +381,16 @@ extension on String {
       substring(0, index) + s + substring(index + 1);
 }
 
+/// Validates that the given board is a valid Fibs board representation.
+///
+/// Checks that the board is a 26xN 2D list with expected pip counts and
+/// piece IDs.
+///
+/// Throws an AssertionError if the board is invalid.
+///
+/// Parameters:
+///
+/// board - The board to validate
 void checkBoard(List<List<int>> board) {
   // track the pieces we find
   final foundPieceIDs =
@@ -357,16 +418,15 @@ void checkBoard(List<List<int>> board) {
 
   // player1 off
   {
-    final sign = -1;
+    const sign = -1;
     final pipPieces = board[0].where((pid) => pid.sign == sign);
     final pieces = pipPieces.length;
-    for (final pieceID in pipPieces) {
-      found(pieceID);
-    }
+    pipPieces.forEach(found);
 
-    // if we've got off pieces, ensure there aren't any pieces outside the home board
+    // if we've got off pieces, ensure there aren't any pieces outside the home
+    // board
     if (pieces > 0) {
-      for (var pip in List<int>.generate(19, (i) => 25 - i)) {
+      for (final pip in List<int>.generate(19, (i) => 25 - i)) {
         assert(board[pip].isEmpty || board[pip][0].sign != sign,
             'found X pieces outside home board on pip $pip');
       }
@@ -375,16 +435,15 @@ void checkBoard(List<List<int>> board) {
 
   // player2 off
   {
-    final sign = 1;
+    const sign = 1;
     final pipPieces = board[25].where((pid) => pid.sign == sign);
     final pieces = pipPieces.length;
-    for (final pieceID in pipPieces) {
-      found(pieceID);
-    }
+    pipPieces.forEach(found);
 
-    // if we've got off pieces, ensure there aren't any pieces outside the home board
+    // if we've got off pieces, ensure there aren't any pieces outside the home
+    // board
     if (pieces > 0) {
-      for (var pip in List<int>.generate(19, (i) => 0 + i)) {
+      for (final pip in List<int>.generate(19, (i) => 0 + i)) {
         assert(board[pip].isEmpty || board[pip][0].sign != sign,
             'found O pieces outside home board on pip $pip');
       }
@@ -393,18 +452,12 @@ void checkBoard(List<List<int>> board) {
 
   // player1 bar
   {
-    final pipPieces = board[25].where((pid) => pid < 0);
-    for (final pieceID in pipPieces) {
-      found(pieceID);
-    }
+    board[25].where((pid) => pid < 0).forEach(found);
   }
 
   // player2 bar
   {
-    final pipPieces = board[0].where((pid) => pid > 0);
-    for (final pieceID in pipPieces) {
-      found(pieceID);
-    }
+    board[0].where((pid) => pid > 0).forEach(found);
   }
 
   // check that we found all the pieces
@@ -418,6 +471,16 @@ void checkBoard(List<List<int>> board) {
   }
 }
 
+/// Validates that the given lines represent a valid Fibs board.
+///
+/// Checks that there are exactly 13 lines and that each line matches
+/// the expected format.
+///
+/// Throws an AssertionError if validation fails.
+///
+/// Parameters:
+///
+/// lines - The list of input lines
 void checkLines(List<String> lines) {
   final tlines = _boardTemplate.split('\n').take(13).toList();
   assert(lines.length == 13);

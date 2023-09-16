@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:fibsboard/fibsboard.dart' as fb;
 
 void main() {
