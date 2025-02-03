@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:dartx/dartx.dart';
 
 /// Converts a board representation as a 2D list of ints into a Dart string
@@ -18,7 +19,10 @@ String dartFromBoard(List<List<int>> board) {
     final p2pieces = board[pip].where((pid) => pid > 0).length;
     final p1label = p1pieces == 0 ? null : '${p1pieces}x player1';
     final p2label = p2pieces == 0 ? null : '${p2pieces}x player2';
-    final labels = [if (p1label != null) p1label, if (p2label != null) p2label];
+    final labels = <String>[
+      if (p1label != null) p1label,
+      if (p2label != null) p2label
+    ];
 
     sb.write('  [');
     sb.write(board[pip].sorted().map((pid) => pid.toString()).join(', '));
